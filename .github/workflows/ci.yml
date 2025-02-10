@@ -1,0 +1,73 @@
+name: CI/CD Pipeline for AI Agent
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate:
+    name: Validate Code & JSON
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Dependencies
+        run: npm install
+
+      # Step: Validate JSON file (sử dụng ajv-cli để so sánh với schema)
+      - name: Validate JSON Config
+        run: npx ajv validate -s schema/agent-schema.json -d agent-config.json
+
+      # Step: Lint code (ví dụ sử dụng ESLint)
+      - name: Run Lint
+        run: npm run lint
+
+  test:
+    name: Run Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Dependencies
+        run: npm install
+
+      # Chạy unit test (ví dụ sử dụng Jest)
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+      # Chạy integration test (giả sử bạn có script cho integration test)
+      - name: Run Integration Tests
+        run: npm run test:integration
+
+  deploy:
+    name: Deploy to Staging (Optional)
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && success()
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Deploy to Staging Server
+        run: |
+          # Lệnh triển khai của bạn, ví dụ dùng SSH hoặc công cụ deploy khác
+          ./deploy.sh staging
