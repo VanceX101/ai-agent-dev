@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "lint": "eslint .",
+    "test:unit": "jest --config jest.unit.config.js",
+    "test:cases": "jest --config jest.integration.config.js"
+  }
+}
